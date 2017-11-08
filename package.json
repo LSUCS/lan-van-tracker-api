@@ -1,0 +1,24 @@
+{
+  "name": "lan-van-tracker-api",
+  "version": "1.0.0",
+  "description": "LAN Van Tracker.",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "connect": "^3.2.0",
+    "cors": "^2.8.3",
+    "csv-parse": "^2.0.0",
+    "js-yaml": "^3.3.0",
+    "mongoose": "^4.13.0",
+    "randomstring": "^1.1.5",
+    "swagger-tools": "0.10.1"
+  }
+}

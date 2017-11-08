@@ -1,0 +1,275 @@
+---
+swagger: "2.0"
+info:
+  description: "LAN Van Tracker."
+  version: "1.0.0"
+  title: "LAN Van Tracker API"
+  contact:
+    email: "zackpollard@ymail.com"
+host: "localhost:8080"
+basePath: "/api/v1"
+tags:
+- name: "van"
+  description: "Setting and Retrieving the Van  and status"
+- name: "dropups"
+  description: "Getting and setting the dropoff/pickup points for LAN Van"
+schemes:
+- "http"
+paths:
+  /van/status:
+    get:
+      tags:
+      - "van"
+      summary: "Get the status of the LAN Van"
+      description: ""
+      operationId: "getVanStatus"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/Status"
+      x-swagger-router-controller: "Van"
+    put:
+      tags:
+      - "van"
+      summary: "Set the status of the LAN Van"
+      description: ""
+      operationId: "setVanStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "AuthKey"
+        in: "header"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "The status of the LAN Van that should be set on the server"
+        required: true
+        schema:
+          $ref: "#/definitions/Status"
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/Status"
+        401:
+          description: "Unauthorised Access"
+        405:
+          description: "Invalid status input"
+      x-swagger-router-controller: "Van"
+  /van/location:
+    get:
+      tags:
+      - "van"
+      summary: "Gets the current location of the LAN Van"
+      description: ""
+      operationId: "getVanLocation"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/Location"
+      x-swagger-router-controller: "Van"
+    put:
+      tags:
+      - "van"
+      summary: "Set the current location of the LAN Van"
+      description: ""
+      operationId: "setVanLocation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "AuthKey"
+        in: "header"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "The current location of the LAN Van"
+        required: true
+        schema:
+          $ref: "#/definitions/Location"
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/Location"
+        401:
+          description: "Unauthorised Access"
+      x-swagger-router-controller: "Van"
+  /dropups:
+    get:
+      tags:
+      - "dropups"
+      summary: "Get the list of all the dropups"
+      description: "Return a list of dropups, data is filtered if you don't provide\
+        \ an auth key. If no auth_key is specified in the header, address' and phone\
+        \ numbers will be removed from the data"
+      operationId: "getDropUps"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "AuthKey"
+        in: "header"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/DropUp"
+      x-swagger-router-controller: "Dropups"
+    put:
+      tags:
+      - "dropups"
+      summary: "Set the new dropups for the LAN Van"
+      description: "A CSV file that will be processed by the server for the new dropups"
+      operationId: "setDropUps"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "AuthKey"
+        in: "header"
+        required: true
+        type: "string"
+      - name: "file"
+        in: "formData"
+        description: "CSV containing the new dropup points for LAN Van"
+        required: true
+        type: "file"
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/DropUp"
+        401:
+          description: "Unauthorised Access"
+        405:
+          description: "Invalid CSV File"
+      x-swagger-router-controller: "Dropups"
+  /dropups/current:
+    get:
+      tags:
+      - "dropups"
+      summary: "Get the current dropup point for LAN Van"
+      description: "The next dropup point that LAN Van is on it's way to"
+      operationId: "getCurrentDropup"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/inline_response_200"
+      x-swagger-router-controller: "Dropups"
+    put:
+      tags:
+      - "dropups"
+      summary: "Set the current dropup for LAN Van"
+      description: "The next dropup point that LAN Van is on it's way to"
+      operationId: "setCurrentDropup"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "AuthKey"
+        in: "header"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "The ID of the dropup point"
+        required: true
+        schema:
+          $ref: "#/definitions/body"
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/body"
+        401:
+          description: "Unauthorised Access"
+        405:
+          description: "Invalid dropup point id"
+      x-swagger-router-controller: "Dropups"
+definitions:
+  Status:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        description: "LAN Van Tracking Status"
+        enum:
+        - "tracking"
+        - "disconnected"
+        - "connected"
+  Location:
+    type: "object"
+    properties:
+      latitude:
+        type: "number"
+        format: "double"
+        description: "The current latitude of the LAN Van"
+        minimum: -90
+        maximum: 90
+      longitude:
+        type: "number"
+        format: "double"
+        description: "The current longitude of the LAN Van"
+        minimum: -180
+        maximum: 180
+  DropUp:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        description: "The ID of the dropup point"
+      address:
+        type: "string"
+        description: "The address of the dropup point"
+      time:
+        type: "string"
+        description: "DropUp Time e.g. 7:00PM"
+      people:
+        type: "array"
+        description: "An array of the people being dropupped at this point"
+        items:
+          $ref: "#/definitions/Person"
+    description: "A dropoff/pickup point, therefore a DropUp point"
+  Person:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      phonenumber:
+        type: "string"
+        description: "The phone number of the user"
+  inline_response_200:
+    properties:
+      id:
+        type: "integer"
+  body:
+    properties:
+      currentDropUpId:
+        type: "integer"
