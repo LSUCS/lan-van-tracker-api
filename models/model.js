@@ -9,7 +9,6 @@
     var Schema = mongoose.Schema;
 
     var van = new Schema({
-        status          : {type : String},
         latitude        : {type : Number},
         longitude       : {type : Number},
         currentDropUpId : {type : Number}

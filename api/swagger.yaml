@@ -6,7 +6,7 @@ info:
   title: "LAN Van Tracker API"
   contact:
     email: "zackpollard@ymail.com"
-host: "localhost:8080"
+host: "192.168.0.20:8080"
 basePath: "/api/v1"
 tags:
 - name: "van"
@@ -31,37 +31,6 @@ paths:
           description: "Operation Successful"
           schema:
             $ref: "#/definitions/Status"
-      x-swagger-router-controller: "Van"
-    put:
-      tags:
-      - "van"
-      summary: "Set the status of the LAN Van"
-      description: ""
-      operationId: "setVanStatus"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "AuthKey"
-        in: "header"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "body"
-        description: "The status of the LAN Van that should be set on the server"
-        required: true
-        schema:
-          $ref: "#/definitions/Status"
-      responses:
-        200:
-          description: "Operation Successful"
-          schema:
-            $ref: "#/definitions/Status"
-        401:
-          description: "Unauthorised Access"
-        405:
-          description: "Invalid status input"
       x-swagger-router-controller: "Van"
   /van/location:
     get:
@@ -221,7 +190,6 @@ definitions:
         enum:
         - "tracking"
         - "disconnected"
-        - "connected"
   Location:
     type: "object"
     properties:

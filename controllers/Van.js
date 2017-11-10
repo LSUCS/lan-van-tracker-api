@@ -15,7 +15,3 @@ module.exports.getVanStatus = function getVanStatus (req, res, next) {
 module.exports.setVanLocation = function setVanLocation (req, res, next) {
   Van.setVanLocation(req.swagger.params, res, next);
 };
-
-module.exports.setVanStatus = function setVanStatus (req, res, next) {
-  Van.setVanStatus(req.swagger.params, res, next);
-};
