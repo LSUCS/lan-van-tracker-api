@@ -64,70 +64,84 @@ exports.setCurrentDropup = function(args, res, next) {
 
 exports.setDropUps = function(args, res, next) {
 
+    var responseSent = false;
+
     if(SettingsService.getAuthKey() === args['AuthKey'].value) {
 
-        var dropups = [];
-        parse(args.file.value.buffer.toString(), function (err, output) {
-            var dropup = {};
-            var people = [];
-            var id = 0;
-            for (var i = 1; i < output.length; ++i) {
-                dropup['id'] = id++;
-                dropup['address'] = output[i][2];
-                dropup['time'] = output[i][3];
-                people.push({name: output[i][0], phonenumber: output[i][1]});
-                for (var j = i + 1; j < output.length; ++j) {
-                    if (!output[j][2] || !output[j][3]) {
-                        people.push({name: output[j][0], phonenumber: output[j][1]});
-                        //This stops the last element being added twice if it has no address or time
-                        //(i.e. an extra person at a dropup point)
-                        if (j === (output.length - 1)) {
-                            i = j;
+        try {
+            parse(args.file.value.buffer.toString(), function (err, output) {
+                var dropups = [];
+                try {
+                    var dropup = {};
+                    var people = [];
+                    var id = 0;
+                    for (var i = 1; i < output.length; ++i) {
+                        dropup['id'] = id++;
+                        dropup['address'] = output[i][2];
+                        dropup['time'] = output[i][3];
+                        people.push({name: output[i][0], phonenumber: output[i][1]});
+                        for (var j = i + 1; j < output.length; ++j) {
+                            if (!output[j][2] || !output[j][3]) {
+                                people.push({name: output[j][0], phonenumber: output[j][1]});
+                                //This stops the last element being added twice if it has no address or time
+                                //(i.e. an extra person at a dropup point)
+                                if (j === (output.length - 1)) {
+                                    i = j;
+                                }
+                            } else {
+                                i = j - 1;
+                                break;
+                            }
                         }
-                    } else {
-                        i = j - 1;
-                        break;
+
+                        dropup['people'] = people;
+
+                        dropups.push(dropup);
+
+                        dropup = {};
+                        people = [];
                     }
-                }
 
-                dropup['people'] = people;
+                    DropUp.remove({}, function (err, task) {
+                        if (err) {
+                            res.statusCode = 500;
+                            res.end(err.message);
+                            return;
+                        }
 
-                dropups.push(dropup);
+                        DropUp.create(dropups, function (err, task) {
+                            if (err) {
+                                res.statusCode = 500;
+                                res.end(err.message);
+                                return;
+                            }
 
-                dropup = {};
-                people = [];
-            }
-        });
-
-        DropUp.remove({}, function (err, task) {
-            if (err) {
-                res.statusCode = 500;
-                res.end(err.message);
-                return;
-            }
-
-            DropUp.create(dropups, function (err, task) {
-                if (err) {
+                            DropUp.find({}, {
+                                _id: false,
+                                __v: false,
+                                'people._id': false
+                            }).sort({id: 1}).exec(function (err, task) {
+                                if (err) {
+                                    res.statusCode = 500;
+                                    res.end(err.message);
+                                    return;
+                                }
+                                res.setHeader('Content-Type', 'application/json');
+                                res.end(JSON.stringify(task));
+                            });
+                        });
+                    });
+                } catch (err) {
                     res.statusCode = 500;
-                    res.end(err.message);
-                    return;
-                }
-
-                DropUp.find({}, {
-                    _id: false,
-                    __v: false,
-                    'people._id': false
-                }).sort({id: 1}).exec(function (err, task) {
-                    if (err) {
-                        res.statusCode = 500;
-                        res.end(err.message);
-                        return;
-                    }
                     res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify(task));
-                });
+                    res.end(JSON.stringify({error: err.message}));
+                }
             });
-        });
+        } catch (err) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({error: err.message}));
+        }
     } else {
         res.statusCode = 401;
         res.end();
