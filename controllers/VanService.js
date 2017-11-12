@@ -9,11 +9,7 @@ var tracking = false;
 
 //This will
 setInterval(function() {
-    console.log("Running task");
-    console.log("Tracking Status: " + tracking);
-    console.log("Tracking time difference " + (Math.floor(new Date() / 1000) - lastTrackingUpdate));
     if(tracking && (Math.floor(new Date() / 1000) - lastTrackingUpdate) > 60) {
-        console.log("Tracking disabled")
         tracking = false;
     }
 }, 1000);
